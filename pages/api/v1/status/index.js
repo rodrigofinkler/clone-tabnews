@@ -23,7 +23,7 @@ export default async function status(request, response) {
   const databaseOpenedConnectionsValue =
     databaseOpenedConnectionsResult?.rows[0]?.opened_connections;
 
-  response.status(200).json({
+  return response.status(200).json({
     updated_at: updatedAt,
     dependencies: {
       database: {
