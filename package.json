@@ -10,6 +10,8 @@
     "services:stop": "docker compose -f infra/compose.yaml stop",
     "lint:prettier:check": "prettier --check .",
     "lint:prettier:fix": "prettier --write .",
+    "lint:eslint:check": "npx eslint . --max-warnings 0",
+    "lint:eslint:fix": "npx eslint . --max-warnings 0 --fix",
     "test": "npm run services:up && concurrently -n next,jest --hide next -k -s command-jest \"next dev\" \"jest --runInBand --verbose\"",
     "test:watch": "jest --watchAll --runInBand",
     "migration:create": "node-pg-migrate -m infra/migrations create",
