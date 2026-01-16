@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -15,4 +17,4 @@ jobs:
 
       - run: npm ci
 
-      - run: docker run --rm -v "$(pwd):/workdir" -i --rm trufflesecurity/trufflehog:latest git file:///workdir --since-commit HEAD --no-verification --fail
+      - run: docker run --rm -v "$(pwd):/workdir" -i --rm trufflesecurity/trufflehog:latest git file:///workdir --since-commit ${{ github.event.pull_request.head.sha}}~${{ github.event.pull_request.commits}} --no-verification --fail
