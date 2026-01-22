@@ -2,6 +2,7 @@ import migrationRunner from "node-pg-migrate";
 import { resolve } from "node:path";
 
 import database from "infra/database.js";
+import { ServiceError } from "infra/errors";
 
 const defaultMigrationOptions = {
   dryRun: true,
@@ -21,6 +22,12 @@ async function listPendingMigrations() {
       dbClient,
     });
     return pendingMigrations;
+  } catch (error) {
+    const serviceErrorObject = new ServiceError({
+      message: "Erro na conexão com Banco ou na aplicação das migrações.",
+      cause: error,
+    });
+    throw serviceErrorObject;
   } finally {
     await dbClient?.end();
   }
@@ -37,6 +44,12 @@ async function runPendingMigrations() {
       dryRun: false,
     });
     return migratedMigrations;
+  } catch (error) {
+    const serviceErrorObject = new ServiceError({
+      message: "Erro na conexão com Banco ou na aplicação das migrações.",
+      cause: error,
+    });
+    throw serviceErrorObject;
   } finally {
     await dbClient?.end();
   }
