@@ -29,12 +29,14 @@ exports.up = (pgm) => {
     // Why timestamp with timezone? https://justatheory.com/2012/04/postgres-use-timestamptz/
     created_at: {
       type: "timestamptz",
-      default: pgm.func("now()"),
+      default: pgm.func("timezone('utc', now())"),
+      notNull: true,
     },
 
     updated_at: {
       type: "timestamptz",
-      default: pgm.func("now()"),
+      default: pgm.func("timezone('utc', now())"),
+      notNull: true,
     },
   });
 };
