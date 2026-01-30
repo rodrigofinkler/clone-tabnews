@@ -125,7 +125,7 @@ async function validateUniqueEmail(email) {
   });
   if (results.rowCount > 0) {
     throw new ValidationError({
-      message: "O email informado já está sendo utilizado",
+      message: "O email informado já está sendo utilizado.",
       action: "Utilize outro email para realizar esta operação.",
     });
   }
@@ -145,7 +145,7 @@ async function validateUniqueUsername(username) {
   });
   if (results.rowCount > 0) {
     throw new ValidationError({
-      message: "O username informado já está sendo utilizado",
+      message: "O username informado já está sendo utilizado.",
       action: "Utilize outro username para realizar esta operação.",
     });
   }
