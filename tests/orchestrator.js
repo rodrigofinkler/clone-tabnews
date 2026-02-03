@@ -3,10 +3,15 @@ import { faker } from "@faker-js/faker";
 
 import database from "infra/database.js";
 import migrator from "models/migrator.js";
+import session from "models/session.js";
 import user from "models/user.js";
 
 async function clearDatabase() {
   await database.query("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
+}
+
+async function createSession(user_id) {
+  return await session.create(user_id);
 }
 
 async function createUser(userObject) {
@@ -43,6 +48,7 @@ async function waitForAllServices() {
 
 const orchestrator = {
   clearDatabase,
+  createSession,
   createUser,
   runPendingMigrations,
   waitForAllServices,
