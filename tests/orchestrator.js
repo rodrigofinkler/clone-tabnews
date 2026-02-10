@@ -6,6 +6,8 @@ import migrator from "models/migrator.js";
 import session from "models/session.js";
 import user from "models/user.js";
 
+const emailHttpUrl = `http://${process.env.EMAIL_HTTP_HOST}:${process.env.EMAIL_HTTP_PORT}`;
+
 async function clearDatabase() {
   await database.query("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
 }
@@ -23,12 +25,50 @@ async function createUser(userObject) {
   });
 }
 
+async function deleteAllEmails() {
+  await fetch(`${emailHttpUrl}/messages`, {
+    method: "DELETE",
+  });
+}
+
+async function getLastEmail() {
+  const emailListResponse = await fetch(`${emailHttpUrl}/messages`);
+  const emailListBody = await emailListResponse.json();
+  const lastEmailItem = emailListBody.pop();
+
+  const lastEmailTextResponse = await fetch(
+    `${emailHttpUrl}/messages/${lastEmailItem?.id}.plain`,
+  );
+  const lastEmailTextResponseBody = await lastEmailTextResponse.text();
+
+  return {
+    ...lastEmailItem,
+    text: lastEmailTextResponseBody,
+  };
+}
+
 async function runPendingMigrations() {
   await migrator.runPendingMigrations();
 }
 
 async function waitForAllServices() {
+  await waitForEmailServer();
   await waitForWebServer();
+
+  async function waitForEmailServer() {
+    return retry(fetchEmailPage, {
+      retries: 100,
+      maxTimeout: 1000,
+    });
+
+    async function fetchEmailPage() {
+      const response = await fetch(emailHttpUrl);
+
+      if (response.status != 200) {
+        throw Error();
+      }
+    }
+  }
 
   async function waitForWebServer() {
     return retry(fetchStatusPage, {
@@ -50,6 +90,8 @@ const orchestrator = {
   clearDatabase,
   createSession,
   createUser,
+  deleteAllEmails,
+  getLastEmail,
   runPendingMigrations,
   waitForAllServices,
 };
