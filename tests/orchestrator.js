@@ -90,6 +90,11 @@ async function waitForAllServices() {
   }
 }
 
+function extractUuid(text) {
+  const match = text.match(/[0-9a-fA-F-]{36}/);
+  return match ? match[0] : null;
+}
+
 const orchestrator = {
   clearDatabase,
   createSession,
@@ -98,6 +103,7 @@ const orchestrator = {
   getLastEmail,
   runPendingMigrations,
   waitForAllServices,
+  extractUuid,
 };
 
 export default orchestrator;

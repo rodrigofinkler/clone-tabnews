@@ -1,3 +1,4 @@
+import webserver from "infra/webserver.js";
 import activation from "models/activation.js";
 import orchestrator from "tests/orchestrator.js";
 
@@ -45,15 +46,21 @@ describe("Use case: Registration Flow (all successful)", () => {
   test("Receive activation email", async () => {
     const lastEmail = await orchestrator.getLastEmail();
 
-    const activationToken = await activation.findOneByUserId(
-      createUserResponseBody.id,
-    );
-
     expect(lastEmail.sender).toBe("<nao-responda@rodrigofinkler.com.br>");
     expect(lastEmail.recipients[0]).toBe("<registrationflow@curso.dev>");
     expect(lastEmail.subject).toBe("Ative seu cadastro na plataforma!");
     expect(lastEmail.text).toContain("RegistrationFlow");
-    expect(lastEmail.text).toContain(activationToken.id);
+
+    const extractedToken = orchestrator.extractUuid(lastEmail.text);
+
+    expect(lastEmail.text).toContain(
+      `${webserver.origin}/cadastro/ativar/${extractedToken}`,
+    );
+
+    const validToken = await activation.findValidTokenById(extractedToken);
+
+    expect(validToken.user_id).toBe(createUserResponseBody.id);
+    expect(validToken.used_at).toBe(null);
   });
 
   test("Activate account", async () => {});

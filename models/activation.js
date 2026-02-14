@@ -26,11 +26,11 @@ async function create(userId) {
   }
 }
 
-async function findOneByUserId(userId) {
-  const token = await runSelectQuery(userId);
+async function findValidTokenById(tokenId) {
+  const token = await runSelectQuery(tokenId);
   return token;
 
-  async function runSelectQuery(userId) {
+  async function runSelectQuery(tokenId) {
     const results = await database.query({
       text: `
         SELECT
@@ -38,10 +38,12 @@ async function findOneByUserId(userId) {
         FROM
           user_activation_tokens
         WHERE
-          user_id = $1
+          id = $1
+          AND expires_at > NOW()
+          AND used_at IS NULL
         LIMIT 1
       ;`,
-      values: [userId],
+      values: [tokenId],
     });
     return results.rows[0];
   }
@@ -63,7 +65,7 @@ Equipe Clone Tabnews`,
 
 const activation = {
   create,
-  findOneByUserId,
+  findValidTokenById,
   sendEmailToUser,
 };
 
