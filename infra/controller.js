@@ -1,5 +1,6 @@
 import * as cookie from "cookie";
 
+import authorization from "models/authorization.js";
 import session from "models/session.js";
 import user from "models/user.js";
 import {
@@ -41,7 +42,7 @@ function onNoMatchHandler(request, response) {
 function canRequest(feature) {
   return function canRequestMiddleware(request, response, next) {
     const userAttemptingRequest = request.context.user;
-    if (userAttemptingRequest?.features?.includes(feature)) {
+    if (authorization.can(userAttemptingRequest, feature)) {
       return next();
     }
     throw new ForbiddenError({

@@ -5,8 +5,13 @@ import database from "infra/database.js";
 import migrator from "models/migrator.js";
 import session from "models/session.js";
 import user from "models/user.js";
+import activation from "models/activation";
 
 const emailHttpUrl = `http://${process.env.EMAIL_HTTP_HOST}:${process.env.EMAIL_HTTP_PORT}`;
+
+async function activateUser(userId) {
+  return await activation.activateUserByUserId(userId);
+}
 
 async function clearDatabase() {
   await database.query("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
@@ -96,6 +101,7 @@ function extractUuid(text) {
 }
 
 const orchestrator = {
+  activateUser,
   clearDatabase,
   createSession,
   createUser,
