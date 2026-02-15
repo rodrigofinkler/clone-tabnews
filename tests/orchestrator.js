@@ -17,8 +17,8 @@ async function clearDatabase() {
   await database.query("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
 }
 
-async function createSession(user_id) {
-  return await session.create(user_id);
+async function createSession(userId) {
+  return await session.create(userId);
 }
 
 async function createUser(userObject) {
