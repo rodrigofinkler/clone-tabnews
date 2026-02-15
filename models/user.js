@@ -188,7 +188,8 @@ async function setFeatures(userId, features) {
         UPDATE
           users
         SET
-          features = $2
+          features = $2,
+          updated_at = timezone('utc', now())
         WHERE
           id = $1
         RETURNING
