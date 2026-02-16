@@ -1,3 +1,5 @@
+import { version as uuidVersion } from "uuid";
+
 import webserver from "infra/webserver.js";
 import activation from "models/activation.js";
 import user from "models/user.js";
@@ -13,6 +15,7 @@ beforeAll(async () => {
 describe("Use case: Registration Flow (all successful)", () => {
   let createUserResponseBody;
   let activationTokenId;
+  let createSessionResponseBody;
 
   test("Create user account", async () => {
     const createUserResponse = await fetch(
@@ -80,7 +83,9 @@ describe("Use case: Registration Flow (all successful)", () => {
     expect(Date.parse(activationResponseBody.used_at)).not.toBeNaN();
 
     const activatedUser = await user.findOneByUsername("RegistrationFlow");
-    expect(activatedUser.features).toEqual(["create:session"]);
+    expect(new Set(activatedUser.features)).toEqual(
+      new Set(["read:session", "create:session"]),
+    );
   });
 
   test("Login", async () => {
@@ -100,10 +105,32 @@ describe("Use case: Registration Flow (all successful)", () => {
 
     expect(createSessionResponse.status).toBe(201);
 
-    const createSessionResponseBody = await createSessionResponse.json();
+    createSessionResponseBody = await createSessionResponse.json();
 
     expect(createSessionResponseBody.user_id).toBe(createUserResponseBody.id);
   });
 
-  test("Get user information", async () => {});
+  test("Get user information", async () => {
+    const getUserResponse = await fetch("http://localhost:3000/api/v1/user", {
+      headers: {
+        cookie: `session_id=${createSessionResponseBody.token}`,
+      },
+    });
+    expect(getUserResponse.status).toBe(200);
+
+    const getUserResponseBody = await getUserResponse.json();
+
+    expect(getUserResponseBody).toEqual({
+      id: getUserResponseBody.id,
+      username: "RegistrationFlow",
+      email: "registrationflow@curso.dev",
+      features: ["create:session", "read:session"],
+      password: getUserResponseBody.password,
+      created_at: getUserResponseBody.created_at,
+      updated_at: getUserResponseBody.updated_at,
+    });
+    expect(uuidVersion(getUserResponseBody.id)).toBe(4);
+    expect(Date.parse(getUserResponseBody.created_at)).not.toBeNaN();
+    expect(Date.parse(getUserResponseBody.updated_at)).not.toBeNaN();
+  });
 });
