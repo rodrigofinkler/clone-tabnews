@@ -2,10 +2,10 @@ import retry from "async-retry";
 import { faker } from "@faker-js/faker";
 
 import database from "infra/database.js";
+import activation from "models/activation.js";
 import migrator from "models/migrator.js";
 import session from "models/session.js";
 import user from "models/user.js";
-import activation from "models/activation";
 
 const emailHttpUrl = `http://${process.env.EMAIL_HTTP_HOST}:${process.env.EMAIL_HTTP_PORT}`;
 
@@ -28,6 +28,11 @@ async function createUser(userObject) {
     email: userObject?.email ?? faker.internet.email(),
     password: userObject?.password ?? "validpassword",
   });
+}
+
+async function createUserActivationToken(userId) {
+  const activationToken = await activation.create(userId);
+  return activationToken;
 }
 
 async function deleteAllEmails() {
@@ -105,6 +110,7 @@ const orchestrator = {
   clearDatabase,
   createSession,
   createUser,
+  createUserActivationToken,
   deleteAllEmails,
   getLastEmail,
   runPendingMigrations,

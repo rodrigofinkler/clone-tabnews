@@ -1,11 +1,22 @@
 import database from "infra/database";
 import email from "infra/email.js";
+import { ForbiddenError, NotFoundError } from "infra/errors.js";
 import webserver from "infra/webserver.js";
+import authorization from "models/authorization.js";
 import user from "models/user.js";
 
 const EXPIRATION_IN_MILLISECONDS = 60 * 15 * 1000; // 15min
 
 async function activateUserByUserId(userId) {
+  const userToActivate = await user.findOneById(userId);
+
+  if (!authorization.can(userToActivate, "read:activation_token")) {
+    throw new ForbiddenError({
+      message: "Você não pode mais utilizar tokens de ativação.",
+      action: "Entre em contato com o suporte.",
+    });
+  }
+
   const activatedUser = await user.setFeatures(userId, [
     "create:session",
     "read:session",
@@ -54,6 +65,15 @@ async function findValidTokenById(tokenId) {
       ;`,
       values: [tokenId],
     });
+
+    if (results.rowCount === 0) {
+      throw new NotFoundError({
+        message:
+          "O token de ativação utilizado não foi encontrado no sistema ou expirou.",
+        action: "Faça um novo cadastro.",
+      });
+    }
+
     return results.rows[0];
   }
 }
@@ -97,6 +117,7 @@ Equipe Clone Tabnews`,
 }
 
 const activation = {
+  EXPIRATION_IN_MILLISECONDS,
   activateUserByUserId,
   create,
   findValidTokenById,
