@@ -84,7 +84,7 @@ describe("Use case: Registration Flow (all successful)", () => {
 
     const activatedUser = await user.findOneByUsername("RegistrationFlow");
     expect(activatedUser.features.sort()).toEqual(
-      ["create:session", "read:session"].sort(),
+      ["create:session", "read:session", "update:user"].sort(),
     );
   });
 
@@ -124,7 +124,7 @@ describe("Use case: Registration Flow (all successful)", () => {
       id: getUserResponseBody.id,
       username: "RegistrationFlow",
       email: "registrationflow@curso.dev",
-      features: ["create:session", "read:session"],
+      features: ["create:session", "read:session", "update:user"],
       password: getUserResponseBody.password,
       created_at: getUserResponseBody.created_at,
       updated_at: getUserResponseBody.updated_at,
