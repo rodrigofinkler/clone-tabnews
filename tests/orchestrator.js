@@ -13,6 +13,11 @@ async function activateUser(userId) {
   return await activation.activateUserByUserId(userId);
 }
 
+async function addFeaturesToUser(userId, features) {
+  const updatedUser = await user.addFeatures(userId, features);
+  return updatedUser;
+}
+
 async function clearDatabase() {
   await database.query("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
 }
@@ -107,6 +112,7 @@ function extractUuid(text) {
 
 const orchestrator = {
   activateUser,
+  addFeaturesToUser,
   clearDatabase,
   createSession,
   createUser,
