@@ -217,9 +217,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       expect(patchResponseBody).toEqual({
         id: patchResponseBody.id,
         username: "uniqueUsername2",
-        email: uniqueUser.email,
         features: ["create:session", "read:session", "update:user"],
-        password: patchResponseBody.password,
         created_at: patchResponseBody.created_at,
         updated_at: patchResponseBody.updated_at,
       });
@@ -261,9 +259,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       expect(patchResponseBody).toEqual({
         id: patchResponseBody.id,
         username: testUser.username,
-        email: "uniqueEmail2@curso.dev",
         features: ["create:session", "read:session", "update:user"],
-        password: patchResponseBody.password,
         created_at: patchResponseBody.created_at,
         updated_at: patchResponseBody.updated_at,
       });
@@ -305,9 +301,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       expect(patchResponseBody).toEqual({
         id: patchResponseBody.id,
         username: testUser.username,
-        email: testUser.email,
         features: ["create:session", "read:session", "update:user"],
-        password: patchResponseBody.password,
         created_at: patchResponseBody.created_at,
         updated_at: patchResponseBody.updated_at,
       });
@@ -375,9 +369,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       expect(patchResponseBody).toEqual({
         id: defaultUser.id,
         username: "ChangedByPrivilegedUser",
-        email: defaultUser.email,
         features: defaultUser.features,
-        password: patchResponseBody.password,
         created_at: patchResponseBody.created_at,
         updated_at: patchResponseBody.updated_at,
       });
