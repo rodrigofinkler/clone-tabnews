@@ -2,18 +2,28 @@ import retry from "async-retry";
 import { faker } from "@faker-js/faker";
 
 import database from "infra/database.js";
+import activation from "models/activation.js";
 import migrator from "models/migrator.js";
 import session from "models/session.js";
 import user from "models/user.js";
 
 const emailHttpUrl = `http://${process.env.EMAIL_HTTP_HOST}:${process.env.EMAIL_HTTP_PORT}`;
 
+async function activateUser(userId) {
+  return await activation.activateUserByUserId(userId);
+}
+
+async function addFeaturesToUser(userId, features) {
+  const updatedUser = await user.addFeatures(userId, features);
+  return updatedUser;
+}
+
 async function clearDatabase() {
   await database.query("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
 }
 
-async function createSession(user_id) {
-  return await session.create(user_id);
+async function createSession(userId) {
+  return await session.create(userId);
 }
 
 async function createUser(userObject) {
@@ -23,6 +33,11 @@ async function createUser(userObject) {
     email: userObject?.email ?? faker.internet.email(),
     password: userObject?.password ?? "validpassword",
   });
+}
+
+async function createUserActivationToken(userId) {
+  const activationToken = await activation.create(userId);
+  return activationToken;
 }
 
 async function deleteAllEmails() {
@@ -35,6 +50,10 @@ async function getLastEmail() {
   const emailListResponse = await fetch(`${emailHttpUrl}/messages`);
   const emailListBody = await emailListResponse.json();
   const lastEmailItem = emailListBody.pop();
+
+  if (!lastEmailItem) {
+    return null;
+  }
 
   const lastEmailTextResponse = await fetch(
     `${emailHttpUrl}/messages/${lastEmailItem?.id}.plain`,
@@ -86,14 +105,23 @@ async function waitForAllServices() {
   }
 }
 
+function extractUuid(text) {
+  const match = text.match(/[0-9a-fA-F-]{36}/);
+  return match ? match[0] : null;
+}
+
 const orchestrator = {
+  activateUser,
+  addFeaturesToUser,
   clearDatabase,
   createSession,
   createUser,
+  createUserActivationToken,
   deleteAllEmails,
   getLastEmail,
   runPendingMigrations,
   waitForAllServices,
+  extractUuid,
 };
 
 export default orchestrator;
